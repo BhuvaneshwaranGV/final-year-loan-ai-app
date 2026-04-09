@@ -349,12 +349,16 @@ class LoanMLService:
         risk_score = int(300 + (probability * 550))
         
         # 6. Determine decision
+        simulated_cibil = transaction_data['simulated_cibil']
+        
         if fraud_result['fraud_score'] >= 5:
             decision = 'REJECTED'
             probability = 0.0
-        elif probability >= 0.70:
+        elif simulated_cibil < 450:
+            decision = 'REJECTED'  # Hard reject for low credit behavior
+        elif (probability >= 0.70 and simulated_cibil >= 600) or (probability >= 0.85):
             decision = 'APPROVED'
-        elif probability >= 0.40:
+        elif probability >= 0.40 or simulated_cibil >= 750:
             decision = 'MANUAL_REVIEW'
         else:
             decision = 'REJECTED'
